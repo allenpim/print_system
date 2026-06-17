@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>列印清單系統</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #111;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .list {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .item {
+      background: #1e1e1e;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #4f46e5;
+      color: white;
+    }
+
+    button:hover {
+      background: #4338ca;
+    }
+
+    /* modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      color: black;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+    }
+
+    .modal-content input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 10px;
+    }
+
+    .actions {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>列印清單</h1>
+
+<div class="list" id="list"></div>
+
+<!-- modal -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <h3>選擇日期</h3>
+    <input type="date" id="dateInput"/>
+
+    <div class="actions">
+      <button onclick="closeModal()">取消</button>
+      <button onclick="confirmPrint()">確認列印</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 假資料
+  const items = [
+    { id: 1, name: "咖啡豆 A" },
+    { id: 2, name: "咖啡豆 B" },
+    { id: 3, name: "濾掛 C" }
+  ];
+
+  let selectedItem = null;
+
+  const listEl = document.getElementById("list");
+
+  function render() {
+    listEl.innerHTML = "";
+    items.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "item";
+
+      div.innerHTML = `
+        <span>${item.name}</span>
+        <button onclick="openModal(${item.id})">列印</button>
+      `;
+
+      listEl.appendChild(div);
+    });
+  }
+
+  function openModal(id) {
+    selectedItem = items.find(i => i.id === id);
+    document.getElementById("modal").style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById("modal").style.display = "none";
+    selectedItem = null;
+  }
+
+  function confirmPrint() {
+    const date = document.getElementById("dateInput").value;
+
+    if (!date) {
+      alert("請選日期");
+      return;
+    }
+
+    const printContent = `
+      <div>
+        <h2>${selectedItem.name}</h2>
+        <p>日期：${date}</p>
+      </div>
+    `;
+
+    const w = window.open("", "_blank");
+    w.document.write(`
+      <html>
+        <head>
+          <title>Print</title>
+        </head>
+        <body onload="window.print(); window.close();">
+          ${printContent}
+        </body>
+      </html>
+    `);
+
+    closeModal();
+  }
+
+  render();
+</script>
+
+</body>
+</html>
