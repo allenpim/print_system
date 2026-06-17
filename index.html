@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>列印系統</title>
+  <title>貼紙列印系統</title>
 
   <style>
     body {
@@ -79,8 +79,17 @@
       justify-content: space-between;
     }
 
-    /* ⭐ 印刷控制（關鍵） */
+    /* ⭐ 35mm × 25mm 貼紙列印 */
     @media print {
+      @page {
+        size: 35mm 25mm;
+        margin: 0;
+      }
+
+      body {
+        margin: 0;
+      }
+
       body * {
         visibility: hidden;
       }
@@ -90,6 +99,15 @@
         position: absolute;
         left: 0;
         top: 0;
+
+        width: 35mm;
+        height: 25mm;
+
+        padding: 2mm;
+        box-sizing: border-box;
+
+        font-size: 8px;
+        line-height: 1.2;
       }
     }
   </style>
@@ -97,12 +115,12 @@
 
 <body>
 
-<h1>列印清單</h1>
+<h1>貼紙列印系統</h1>
 
 <div class="list" id="list"></div>
 
-<!-- hidden print area -->
-<div id="printArea" style="display:none;"></div>
+<!-- print area -->
+<div id="printArea"></div>
 
 <!-- modal -->
 <div class="modal" id="modal">
@@ -168,18 +186,12 @@
 
     printArea.innerHTML = `
       <div>
-        <h2>${selectedItem.name}</h2>
-        <p>日期：${date}</p>
+        <div><b>${selectedItem.name}</b></div>
+        <div>日期：${date}</div>
       </div>
     `;
 
-    printArea.style.display = "block";
-
     window.print();
-
-    setTimeout(() => {
-      printArea.style.display = "none";
-    }, 500);
 
     closeModal();
   }
