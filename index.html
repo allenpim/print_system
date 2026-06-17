@@ -78,6 +78,20 @@
       display: flex;
       justify-content: space-between;
     }
+
+    /* ⭐ 印刷控制（關鍵） */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #printArea {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+    }
   </style>
 </head>
 
@@ -86,6 +100,9 @@
 <h1>列印清單</h1>
 
 <div class="list" id="list"></div>
+
+<!-- hidden print area -->
+<div id="printArea" style="display:none;"></div>
 
 <!-- modal -->
 <div class="modal" id="modal">
@@ -102,7 +119,6 @@
 </div>
 
 <script>
-  // 假資料
   const items = [
     { id: 1, name: "咖啡豆 A" },
     { id: 2, name: "咖啡豆 B" },
@@ -148,38 +164,22 @@
       return;
     }
 
-    const printWindow = window.open("", "_blank");
+    const printArea = document.getElementById("printArea");
 
-    const content = `
-      <html>
-        <head>
-          <title>Print</title>
-          <style>
-            body {
-              font-family: Arial;
-              padding: 20px;
-            }
-          </style>
-        </head>
-
-        <body>
-          <h2>${selectedItem.name}</h2>
-          <p>日期：${date}</p>
-
-          <script>
-            window.onload = function () {
-              window.print();
-              setTimeout(() => window.close(), 500);
-            }
-          <\/script>
-
-        </body>
-      </html>
+    printArea.innerHTML = `
+      <div>
+        <h2>${selectedItem.name}</h2>
+        <p>日期：${date}</p>
+      </div>
     `;
 
-    printWindow.document.open();
-    printWindow.document.write(content);
-    printWindow.document.close();
+    printArea.style.display = "block";
+
+    window.print();
+
+    setTimeout(() => {
+      printArea.style.display = "none";
+    }, 500);
 
     closeModal();
   }
