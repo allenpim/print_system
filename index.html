@@ -1,126 +1,117 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>貼紙列印系統</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sticker Print</title>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #111;
-      color: white;
-      margin: 0;
-      padding: 20px;
-    }
+<style>
+body {
+  font-family: Arial;
+  background: #111;
+  color: white;
+  margin: 0;
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-    }
+h2 {
+  text-align: center;
+}
 
-    .list {
-      max-width: 600px;
-      margin: auto;
-    }
+.list {
+  max-width: 600px;
+  margin: auto;
+}
 
-    .item {
-      background: #1e1e1e;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+.item {
+  background: #1e1e1e;
+  padding: 12px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+}
 
-    button {
-      padding: 8px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #4f46e5;
-      color: white;
-    }
+button {
+  background: #4f46e5;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
 
-    button:hover {
-      background: #4338ca;
-    }
+/* modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
 
-    /* modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-    }
+.modal-content {
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+  width: 280px;
+}
 
-    .modal-content {
-      background: white;
-      color: black;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-    }
+.modal-content input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+}
 
-    .modal-content input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 10px;
-    }
+.actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+}
 
-    .actions {
-      margin-top: 15px;
-      display: flex;
-      justify-content: space-between;
-    }
+/* ⭐ print only sticker */
+@media print {
+  @page {
+    size: 35mm 25mm;
+    margin: 0;
+  }
 
-    /* ⭐ 35mm × 25mm 貼紙列印 */
-    @media print {
-      @page {
-        size: 35mm 25mm;
-        margin: 0;
-      }
+  body * {
+    visibility: hidden;
+  }
 
-      body {
-        margin: 0;
-      }
-
-      body * {
-        visibility: hidden;
-      }
-
-      #printArea {
-        visibility: visible;
-        position: absolute;
-        left: 0;
-        top: 0;
-
-        width: 35mm;
-        height: 25mm;
-
-        padding: 2mm;
-        box-sizing: border-box;
-
-        font-size: 8px;
-        line-height: 1.2;
-      }
-    }
-  </style>
+  #printBox {
+    visibility: visible;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 35mm;
+    height: 25mm;
+    padding: 2mm;
+    font-size: 8px;
+  }
+}
+</style>
 </head>
 
 <body>
 
-<h1>貼紙列印系統</h1>
+<h2>貼紙列印系統</h2>
 
-<div class="list" id="list"></div>
+<div class="list">
+  <div class="item">
+    咖啡豆 A
+    <button onclick="openModal('咖啡豆 A')">列印</button>
+  </div>
 
-<!-- print area -->
-<div id="printArea"></div>
+  <div class="item">
+    咖啡豆 B
+    <button onclick="openModal('咖啡豆 B')">列印</button>
+  </div>
+</div>
 
 <!-- modal -->
 <div class="modal" id="modal">
@@ -136,67 +127,46 @@
   </div>
 </div>
 
+<!-- print area -->
+<div id="printBox"></div>
+
 <script>
-  const items = [
-    { id: 1, name: "咖啡豆 A" },
-    { id: 2, name: "咖啡豆 B" },
-    { id: 3, name: "濾掛 C" }
-  ];
 
-  let selectedItem = null;
+let selectedItem = null;
 
-  const listEl = document.getElementById("list");
+function openModal(name) {
+  selectedItem = name;
+  document.getElementById("modal").style.display = "flex";
+}
 
-  function render() {
-    listEl.innerHTML = "";
+function closeModal() {
+  document.getElementById("modal").style.display = "none";
+  document.getElementById("dateInput").value = "";
+  selectedItem = null;
+}
 
-    items.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "item";
+function confirmPrint() {
+  const date = document.getElementById("dateInput").value;
 
-      div.innerHTML = `
-        <span>${item.name}</span>
-        <button onclick="openModal(${item.id})">列印</button>
-      `;
-
-      listEl.appendChild(div);
-    });
+  if (!date) {
+    alert("請選日期");
+    return;
   }
 
-  function openModal(id) {
-    selectedItem = items.find(i => i.id === id);
-    document.getElementById("modal").style.display = "flex";
-  }
+  const box = document.getElementById("printBox");
 
-  function closeModal() {
-    document.getElementById("modal").style.display = "none";
-    document.getElementById("dateInput").value = "";
-    selectedItem = null;
-  }
+  box.innerHTML = `
+    <div>
+      <b>${selectedItem}</b><br/>
+      ${date}
+    </div>
+  `;
 
-  function confirmPrint() {
-    const date = document.getElementById("dateInput").value;
+  window.print();
 
-    if (!date) {
-      alert("請選日期");
-      return;
-    }
+  closeModal();
+}
 
-    const printArea = document.getElementById("printArea");
-
-    printArea.innerHTML = `
-      <div>
-        <div><b>${selectedItem.name}</b></div>
-        <div>日期：${date}</div>
-      </div>
-    `;
-
-    window.print();
-
-    closeModal();
-  }
-
-  render();
 </script>
 
 </body>
