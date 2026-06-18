@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sticker Print</title>
-
 <style>
 body {
   font-family: Arial;
@@ -13,76 +12,38 @@ body {
   margin: 0;
   padding: 20px;
 }
-
 h2 {
   text-align: center;
 }
-
 .list {
   max-width: 600px;
   margin: auto;
 }
-
 .item {
   background: #1e1e1e;
   padding: 12px;
   margin: 10px 0;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
-
 button {
   background: #4f46e5;
   color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
+  cursor: pointer;
 }
-
-/* modal */
-.modal {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-content {
-  background: white;
-  color: black;
-  padding: 20px;
-  border-radius: 10px;
-  width: 280px;
-}
-
-.modal-content input {
-  width: 100%;
-  padding: 8px;
-  margin-top: 10px;
-}
-
-.actions {
-  margin-top: 15px;
-  display: flex;
-  justify-content: space-between;
-}
-
 /* ⭐ print only sticker */
 @media print {
   @page {
     size: 35mm 25mm;
     margin: 0;
   }
-
   body * {
     visibility: hidden;
   }
-
   #printBox {
     visibility: visible;
     position: absolute;
@@ -96,34 +57,16 @@ button {
 }
 </style>
 </head>
-
 <body>
-
 <h2>貼紙列印系統</h2>
-
 <div class="list">
   <div class="item">
-    咖啡豆 A
-    <button onclick="openModal('咖啡豆 A')">列印</button>
+    臺灣綠檸檬汁
+    <button onclick="printItem('臺灣綠檸檬汁', 7)">列印</button>
   </div>
-
   <div class="item">
-    咖啡豆 B
-    <button onclick="openModal('咖啡豆 B')">列印</button>
-  </div>
-</div>
-
-<!-- modal -->
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <h3>選擇日期</h3>
-
-    <input type="date" id="dateInput"/>
-
-    <div class="actions">
-      <button onclick="closeModal()">取消</button>
-      <button onclick="confirmPrint()">確認列印</button>
-    </div>
+    檸檬原汁
+    <button onclick="printItem('檸檬原汁', 6)">列印</button>
   </div>
 </div>
 
@@ -131,43 +74,27 @@ button {
 <div id="printBox"></div>
 
 <script>
-
-let selectedItem = null;
-
-function openModal(name) {
-  selectedItem = name;
-  document.getElementById("modal").style.display = "flex";
+function formatDate(d) {
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-function closeModal() {
-  document.getElementById("modal").style.display = "none";
-  document.getElementById("dateInput").value = "";
-  selectedItem = null;
-}
+function printItem(name, days) {
+  const start = new Date();
+  const end = new Date();
+  end.setDate(end.getDate() + days);
 
-function confirmPrint() {
-  const date = document.getElementById("dateInput").value;
-
-  if (!date) {
-    alert("請選日期");
-    return;
-  }
+  const startStr = formatDate(start);
+  const endStr = formatDate(end);
 
   const box = document.getElementById("printBox");
-
   box.innerHTML = `
     <div>
-      <b>${selectedItem}</b><br/>
-      ${date}
+      <b>${name}</b><br/>
+      ${startStr}～${endStr}
     </div>
   `;
-
   window.print();
-
-  closeModal();
 }
-
 </script>
-
 </body>
 </html>
