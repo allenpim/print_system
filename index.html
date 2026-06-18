@@ -1,80 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>貼紙列印系統</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #111;
-  color: white;
-  margin: 0;
-  padding: 20px;
+body{
+    font-family: Arial, sans-serif;
+    background:#111;
+    color:#fff;
+    margin:0;
+    padding:20px;
 }
-
-h2 {
-  text-align: center;
+h2{
+    text-align:center;
 }
-
-.list {
-  max-width: 600px;
-  margin: auto;
+.list{
+    max-width:600px;
+    margin:auto;
 }
-
-.item {
-  background: #1e1e1e;
-  padding: 12px;
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.item{
+    background:#1e1e1e;
+    padding:12px;
+    margin:10px 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
-
-button {
-  background: #4f46e5;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
+button{
+    background:#4f46e5;
+    color:#fff;
+    border:none;
+    padding:8px 12px;
+    border-radius:6px;
+    cursor:pointer;
 }
-
-#printBox {
-  display: none;
+#printBox{
+    display:none;
 }
-
-@media print {
-
-  @page {
-    size: 35mm 25mm landscape;
-    margin: 0;
-  }
-
-  body > * {
-    display: none !important;
-  }
-
-  #printBox {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-
-    position: fixed;
-    left: 0;
-    top: 0;
-
-    width: 35mm;
-    height: 25mm;
-
-    box-sizing: border-box;
-    padding: 2mm;
-
-    background: white !important;
-    color: black !important;
-
-    font-size: 10pt;
-    line-height: 1.3;
-
-    overflow: hidden;
-  }
-
-  #printBox * {
-    color: black !important;
-  }
+@media print{
+    @page{
+        size:25mm 35mm;
+        margin:0;
+    }
+    body > *{
+        display:none !important;
+    }
+    #printBox{
+        display:block !important;
+        position:fixed;
+        width:35mm;
+        height:25mm;
+        left:-5mm;
+        top:5mm;
+        transform:rotate(90deg);
+        transform-origin:top left;
+        box-sizing:border-box;
+        padding:2mm;
+        background:#fff;
+        color:#000;
+        font-size:10pt;
+        line-height:1.3;
+    }
+    #printBox *{
+        color:#000 !important;
+    }
 }
 </style>
+</head>
+<body>
+<h2>貼紙列印系統</h2>
+<div class="list">
+<div class="item">
+    臺灣綠檸檬汁
+    <button onclick="printItem('臺灣綠檸檬汁',7)">列印</button>
+</div>
+<div class="item">
+    檸檬原汁
+    <button onclick="printItem('檸檬原汁',6)">列印</button>
+</div>
+</div>
+<div id="printBox"></div>
+<script>
+function formatDate(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    return `${y}/${m}/${d}`;
+}
+function printItem(name,days){
+    const start = new Date();
+    const end = new Date();
+    end.setDate(end.getDate()+days);
+    document.getElementById("printBox").innerHTML = `
+        <strong>${name}</strong><br>
+        開封：${formatDate(start)}<br>
+        有效：${formatDate(end)}
+    `;
+    setTimeout(() => {
+        window.print();
+    }, 300);
+}
+</script>
+</body>
+</html>
