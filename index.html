@@ -1,174 +1,172 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>貼紙列印系統</title>
+<meta charset="UTF-8" />
+<title>Label Print</title>
 
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background:#111;
-    color:#fff;
-    margin:0;
-    padding:20px;
+/* =========================
+   PRINT SETUP (核心)
+========================= */
+@page {
+  size: 50.8mm 101.6mm;
+  margin: 0;
 }
 
-h2{
-    text-align:center;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 50.8mm;
+  height: 101.6mm;
+  font-family: Arial, "Noto Sans TC", sans-serif;
 }
 
-.list{
-    max-width:600px;
-    margin:auto;
+/* Chrome print reset */
+* {
+  box-sizing: border-box;
 }
 
-.item{
-    background:#1e1e1e;
-    padding:12px;
-    margin:10px 0;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    border-radius:8px;
+/* =========================
+   LABEL CONTAINER
+========================= */
+.label {
+  width: 50.8mm;
+  height: 101.6mm;
+  padding: 2.5mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-button{
-    background:#4f46e5;
-    color:#fff;
-    border:none;
-    padding:8px 12px;
-    border-radius:6px;
-    cursor:pointer;
+/* =========================
+   HEADER
+========================= */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
-button:hover{
-    background:#4338ca;
+.title {
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.2;
 }
 
-/* 預設隱藏列印區 */
-#printBox{
-    display:none;
+.subtitle {
+  font-size: 8px;
+  color: #333;
 }
 
-/* ===================== */
-/* 列印專用 */
-/* ===================== */
-@media print{
-
-    @page{
-        size:35mm 25mm;
-        margin:0;
-    }
-
-    html,
-    body{
-        margin:0;
-        padding:0;
-        width:35mm;
-        height:25mm;
-        overflow:hidden;
-        background:#fff;
-    }
-
-    /* 隱藏網站內容 */
-    h2,
-    .list{
-        display:none !important;
-    }
-
-    /* 顯示貼紙 */
-    #printBox{
-        display:block !important;
-
-        position:fixed;
-        left:0;
-        top:0;
-
-        width:35mm;
-        height:25mm;
-
-        box-sizing:border-box;
-        padding:2mm;
-
-        background:#fff;
-        color:#000;
-
-        overflow:hidden;
-    }
-
-    .name{
-        font-size:12px;
-        font-weight:bold;
-        margin-bottom:2px;
-
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
-    }
-
-    .date{
-        font-size:9px;
-        line-height:1.3;
-    }
+/* =========================
+   ITEM BLOCK
+========================= */
+.item-box {
+  margin-top: 2mm;
+  flex: 1;
 }
 
+.row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  margin-bottom: 1.2mm;
+}
+
+.label-text {
+  font-weight: bold;
+}
+
+/* =========================
+   QR + BARCODE AREA
+========================= */
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 2mm;
+}
+
+.qr {
+  width: 18mm;
+  height: 18mm;
+}
+
+.barcode {
+  width: 28mm;
+  height: 10mm;
+}
+
+/* fallback box if generator not loaded */
+.box {
+  border: 1px solid #000;
+}
+
+/* =========================
+   DEBUG (可關掉)
+========================= */
+/*
+.label { border: 1px solid red; }
+*/
 </style>
 </head>
 
 <body>
 
-<h2>貼紙列印系統</h2>
+<div class="label">
 
-<div class="list">
-
-    <div class="item">
-        <span>臺灣綠檸檬汁</span>
-        <button onclick="printItem('臺灣綠檸檬汁',7)">
-            列印
-        </button>
+  <!-- HEADER -->
+  <div>
+    <div class="header">
+      <div>
+        <div class="title">COFFEE ORDER</div>
+        <div class="subtitle">No: A102938</div>
+      </div>
+      <div class="subtitle">2026-06-19</div>
     </div>
 
-    <div class="item">
-        <span>檸檬原汁</span>
-        <button onclick="printItem('檸檬原汁',6)">
-            列印
-        </button>
+    <!-- ITEM -->
+    <div class="item-box">
+      <div class="row">
+        <span class="label-text">品項</span>
+        <span>拿鐵咖啡</span>
+      </div>
+
+      <div class="row">
+        <span class="label-text">冰熱</span>
+        <span>熱</span>
+      </div>
+
+      <div class="row">
+        <span class="label-text">甜度</span>
+        <span>正常</span>
+      </div>
+
+      <div class="row">
+        <span class="label-text">數量</span>
+        <span>1</span>
+      </div>
     </div>
+  </div>
+
+  <!-- QR + BARCODE -->
+  <div class="bottom">
+
+    <!-- QR (放 canvas / img) -->
+    <div>
+      <img class="qr box"
+           src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=ORDER_A102938" />
+    </div>
+
+    <!-- BARCODE (用 barcode library 或 image) -->
+    <div>
+      <img class="barcode box"
+           src="https://barcode.tec-it.com/barcode.ashx?data=A102938&code=Code128&dpi=96" />
+    </div>
+
+  </div>
 
 </div>
-
-<div id="printBox"></div>
-
-<script>
-
-function formatDate(date){
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2,'0');
-    const d = String(date.getDate()).padStart(2,'0');
-
-    return `${y}/${m}/${d}`;
-}
-
-function printItem(name, days){
-
-    const start = new Date();
-
-    const end = new Date();
-    end.setDate(end.getDate() + days);
-
-    document.getElementById("printBox").innerHTML = `
-        <div class="name">${name}</div>
-        <div class="date">開封：${formatDate(start)}</div>
-        <div class="date">有效：${formatDate(end)}</div>
-    `;
-
-    setTimeout(() => {
-        window.print();
-    }, 100);
-}
-
-</script>
 
 </body>
 </html>
