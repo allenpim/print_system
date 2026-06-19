@@ -2,13 +2,16 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>效期標籤列印</title>
+<title>貼紙列印系統</title>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
 body {
     font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0;
     padding: 20px;
 }
 
@@ -16,26 +19,54 @@ h2 {
     text-align: center;
 }
 
+.list {
+    max-width: 600px;
+    margin: auto;
+}
+
+.strtimetitle {
+    font-size: 12pt;
+}
+
+.endtimetitle {
+     margin-top: 2pt;
+    font-size: 12pt;
+}
+
+.time {
+    margin-top: 2pt;
+    font-size: 11pt;
+}
+
 .item {
+    background: #1e1e1e;
+    padding: 12px;
+    margin: 10px 0;
     display: flex;
     justify-content: space-between;
-    padding: 10px;
-    margin: 6px 0;
-    background: #eee;
-    border-radius: 6px;
+    align-items: center;
+    border-radius: 8px;
 }
 
 button {
-    padding: 5px 10px;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
 }
 
-/* ===== 列印區 ===== */
+button:hover {
+    background: #4338ca;
+}
+
+/* 隱藏列印區 */
 #printBox {
     display: none;
 }
 
-/* ===== PRINT SETTING ===== */
+/* 列印設定 */
 @media print {
 
 @page {
@@ -47,55 +78,73 @@ body * {
     visibility: hidden;
 }
 
+body > *:not(#printBox) {
+     display: none !important;
+   }
+
 #printBox, #printBox * {
     visibility: visible;
 }
 
 #printBox {
+    display: flex !important;
+    flex-direction: column;
     position: fixed;
     top: 12mm;
     left: 1mm;
-
     width: 35mm;
-    height: 25mm;
-
-    padding: 1mm;
+    height: 35mm;
+    padding: 1.5mm;
     box-sizing: border-box;
-
     background: #fff;
     color: #000;
-
-    font-size: 7pt;
-    line-height: 1;
     overflow: hidden;
+    font-family: Arial;
+    line-height: 1.2;
+    transform: none !important;
 }
 
 .title {
+    font-size: 12pt;
     font-weight: bold;
-    font-size: 8pt;
-
-    white-space: nowrap;
-    overflow: hidden;
+    margin-bottom: 1mm;
 }
+
 }
 </style>
 </head>
 
 <body>
 
-<h2>效期標籤列印</h2>
+<h2>貼紙列印系統</h2>
 
 <div id="list"></div>
-
 <div id="printBox"></div>
 
 <script>
-
 let dataList = [];
 
-/* =========================
-   讀 Excel（GitHub Pages用）
-========================= */
+/* 本機測試讀 Excel */
+// async function loadExcel(){
+
+//     try {
+//         const res = await fetch("./data.xlsx");
+//         const buffer = await res.arrayBuffer();
+
+//         const workbook = XLSX.read(buffer, {type:"array"});
+//         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+//         dataList = XLSX.utils.sheet_to_json(sheet);
+
+//         renderList();
+
+//     } catch (err) {
+//         console.error("Excel 載入失敗：", err);
+//         alert("讀取 data.xlsx 失敗，請確認有開 Live Server");
+//     }
+// }
+
+/* github讀 Excel */
 async function loadExcel(){
 
     const res = await fetch("./data.xlsx");
@@ -109,9 +158,7 @@ async function loadExcel(){
     renderList();
 }
 
-/* =========================
-   顯示清單
-========================= */
+/* 顯示清單 */
 function renderList(){
 
     const list = document.getElementById("list");
@@ -128,35 +175,30 @@ function renderList(){
     });
 }
 
-/* =========================
-   時間格式：YYYY/MM/DD HH時
-========================= */
-function formatDate(d){
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    const h = String(d.getHours()).padStart(2,'0');
-
-    return `${y}/${m}/${dd} ${h}時`;
+/* 時間 */
+function formatDate(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    const h = String(date.getHours()).padStart(2,'0');
+    const min = String(date.getMinutes()).padStart(2,'0');
+    return `${y}/${m}/${d} ${h}:${min}`;
 }
 
-/* =========================
-   時間計算
-========================= */
 function calcExpiry(start, days, hours){
-
     const end = new Date(start);
-
     end.setDate(end.getDate() + Number(days || 0));
     end.setHours(end.getHours() + Number(hours || 0));
-
     return end;
 }
 
-/* =========================
-    自動縮字
-========================= */
-function autoFitText(el, max = 8, min = 5){
+/* 自動縮字 */
+function autoFitText(el, max = 12, min = 5){
+
+    const text = el.textContent || "";
+    
+    // 🔥 不超過 6 個字 → 不處理
+    if (text.length <= 6) return;
 
     let size = max;
     el.style.fontSize = size + "pt";
@@ -167,9 +209,7 @@ function autoFitText(el, max = 8, min = 5){
     }
 }
 
-/* =========================
-   列印
-========================= */
+/* 列印 */
 function printItem(i){
 
     const item = dataList[i];
@@ -181,11 +221,12 @@ function printItem(i){
 
     box.innerHTML = `
         <div class="title">${item.item}</div>
-        <div>開封 ${formatDate(start)}</div>
-        <div>有效 ${formatDate(end)}</div>
+        <div class="strtimetitle">開封時間</div>
+        <div class="time">${formatDate(start)}</div>
+        <div class="endtimetitle">有效期限</div>
+        <div class="time">${formatDate(end)}</div>
     `;
 
-    // 縮字
     const title = box.querySelector(".title");
     autoFitText(title);
 
@@ -195,7 +236,7 @@ function printItem(i){
 }
 
 /* 啟動 */
-loadExcel();
+window.addEventListener("load", loadExcel);
 
 </script>
 
