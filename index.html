@@ -6,6 +6,7 @@
 <title>貼紙列印系統</title>
 
 <style>
+
 body{
     font-family: Arial, sans-serif;
     background:#111;
@@ -46,75 +47,73 @@ button:hover{
     background:#4338ca;
 }
 
-/* 列印區 */
+/* 預設隱藏列印區 */
 #printBox{
     display:none;
 }
 
-/* ========================= */
-/* 列印設定 */
-/* ========================= */
+/* ===================== */
+/* 列印專用 */
+/* ===================== */
 @media print{
 
     @page{
-        size:33mm 14mm;
+        size:35mm 25mm;
         margin:0;
     }
 
+    html,
     body{
+        width:35mm;
+        height:25mm;
         margin:0;
         padding:0;
-        background:#fff;
+        background:white;
     }
 
-    body *{
-        visibility:hidden;
-    }
-
-    #printBox,
-    #printBox *{
-        visibility:visible;
+    body > *{
+        display:none !important;
     }
 
     #printBox{
-        display:block !important;
+        display:flex !important;
 
-        position:absolute;
+        position:fixed;
         left:0;
         top:0;
 
-        width:33mm;
-        height:14mm;
+        width:35mm;
+        height:25mm;
 
         box-sizing:border-box;
+        padding:2mm;
 
-        padding:1mm;
+        flex-direction:column;
+        justify-content:center;
 
-        background:#fff;
-        color:#000;
+        background:white;
+        color:black;
 
         overflow:hidden;
-
-        font-size:8pt;
-        line-height:1.1;
     }
 
     .name{
+        font-size:12px;
         font-weight:bold;
-        font-size:9pt;
-        margin-bottom:0.5mm;
+        margin-bottom:2px;
         white-space:nowrap;
         overflow:hidden;
         text-overflow:ellipsis;
     }
 
     .date{
-        font-size:7pt;
+        font-size:9px;
+        line-height:1.2;
     }
 }
+
 </style>
 </head>
-
 <body>
 
 <h2>貼紙列印系統</h2>
@@ -123,12 +122,16 @@ button:hover{
 
     <div class="item">
         <span>臺灣綠檸檬汁</span>
-        <button onclick="printItem('臺灣綠檸檬汁',7)">列印</button>
+        <button onclick="printItem('臺灣綠檸檬汁',7)">
+            列印
+        </button>
     </div>
 
     <div class="item">
         <span>檸檬原汁</span>
-        <button onclick="printItem('檸檬原汁',6)">列印</button>
+        <button onclick="printItem('檸檬原汁',6)">
+            列印
+        </button>
     </div>
 
 </div>
@@ -138,14 +141,18 @@ button:hover{
 <script>
 
 function formatDate(date){
+
     const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2,'0');
-    const d = String(date.getDate()).padStart(2,'0');
 
-    const h = String(date.getHours()).padStart(2,'0');
-    const min = String(date.getMinutes()).padStart(2,'0');
+    const m = String(
+        date.getMonth() + 1
+    ).padStart(2,'0');
 
-    return `${y}/${m}/${d} ${h}:${min}`;
+    const d = String(
+        date.getDate()
+    ).padStart(2,'0');
+
+    return `${y}/${m}/${d}`;
 }
 
 function printItem(name, days){
@@ -155,7 +162,7 @@ function printItem(name, days){
     const end = new Date();
     end.setDate(end.getDate() + days);
 
-    document.getElementById("printBox").innerHTML = `
+    document.getElementById('printBox').innerHTML = `
         <div class="name">${name}</div>
         <div class="date">開封：${formatDate(start)}</div>
         <div class="date">有效：${formatDate(end)}</div>
@@ -163,7 +170,7 @@ function printItem(name, days){
 
     setTimeout(() => {
         window.print();
-    }, 200);
+    }, 100);
 }
 
 </script>
