@@ -1,32 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-<meta charset="utf-8">
-<title>QZ Test</title>
-</head>
-<body>
+<meta charset="UTF-8">
+<title>標籤列印系統</title>
 
-<button onclick="check()">測試 QZ Tray</button>
-
-<script>
-function checkQZTray() {
-    return new Promise((resolve) => {
-
-        if (!window.qz) {
-            resolve(false);
-            return;
-        }
-
-        qz.websocket.connect()
-            .then(() => resolve(true))
-            .catch(() => resolve(false));
-    });
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
 }
 
-function check() {
-    checkQZTray().then(hasQZ => {
-        alert(hasQZ ? "有 QZ Tray" : "沒有 QZ Tray");
-    });
+h2 {
+    text-align: center;
+}
+
+.list {
+    max-width: 600px;
+    margin: auto;
+}
+
+.item {
+    background: #1e1e1e;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
+}
+
+button {
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #4338ca;
+}
+
+/* 隱藏列印區 */
+#printBox {
+    display: none;
+}
+
+/* =========================
+   列印設定（關鍵）
+========================= */
+@media print {
+
+@page {
+    size: 35mm 25mm;
+    margin: 0;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+/* 只顯示列印內容 */
+body * {
+    visibility: hidden;
+}
+
+#printBox, #printBox * {
+    visibility: visible;
+}
+
+/* =========================
+   抗旋轉核心版型
+========================= */
+#printBox {
+    display: flex !important;
+    flex-direction: column; /* 🔥關鍵：直式 */
+
+    position: fixed;
+    top: 12mm;
+    left: 1mm;
+
+    width: 35mm;
+    height: 25mm;
+
+    padding: 1.5mm;
+    box-sizing: border-box;
+
+    background: #fff;
+    color: #000;
+
+    overflow: hidden;
+
+    font-family: Arial;
+    line-height: 1.2;
+
+    transform: none !important; /* 防止 rotate */
+}
+
+/* 標題 */
+.title {
+    font-size: 10pt;
+    font-weight: bold;
+    margin-bottom: 1mm;
+}
+
+/* label */
+.label {
+    font-size: 7pt;
+    color: #444;
+}
+
+/* value */
+.value {
+    font-size: 8pt;
+    margin-bottom: 1mm;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<h2>貼紙列印系統</h2>
+
+<div class="list">
+
+    <div class="item">
+        <span>臺灣綠檸檬汁</span>
+        <button onclick="printItem('臺灣綠檸檬汁', 7)">列印</button>
+    </div>
+
+    <div class="item">
+        <span>檸檬原汁</span>
+        <button onclick="printItem('檸檬原汁', 6)">列印</button>
+    </div>
+
+</div>
+
+<!-- 列印區 -->
+<div id="printBox"></div>
+
+<script>
+function formatDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+
+    const h = String(date.getHours()).padStart(2,'0');
+    const min = String(date.getMinutes()).padStart(2,'0');
+
+    return `${m}/${d} ${h}:${min}`;
+}
+
+function printItem(name, days) {
+
+    const start = new Date();
+    const end = new Date();
+    end.setDate(end.getDate() + days);
+
+    document.getElementById("printBox").innerHTML = `
+        <div class="title">${name}</div>
+
+        <div class="label">開封時間</div>
+        <div class="value">${formatDate(start)}</div>
+
+        <div class="label">有效期限</div>
+        <div class="value">${formatDate(end)}</div>
+    `;
+
+    setTimeout(() => {
+        window.print();
+    }, 150);
 }
 </script>
 
