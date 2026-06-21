@@ -25,12 +25,12 @@ h2 {
 }
 
 .strtimetitle {
-    font-size: 12pt;
+    font-size: 5pt;
 }
 
 .endtimetitle {
      margin-top: 2pt;
-    font-size: 12pt;
+    font-size: 5pt;
 }
 
 .time {
@@ -193,11 +193,11 @@ function calcExpiry(start, days, hours){
 }
 
 /* 自動縮字 */
-function autoFitText(el, max = 12, min = 5){
+function autoFitText(el, max = 8, min = 5){
 
     const text = el.textContent || "";
     
-    // 🔥 不超過 6 個字 → 不處理
+    // 不超過 6 個字 → 不處理
     if (text.length <= 6) return;
 
     let size = max;
