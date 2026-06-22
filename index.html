@@ -24,20 +24,6 @@ h2 {
     margin: auto;
 }
 
-.strtimetitle {
-    font-size: 5pt;
-}
-
-.endtimetitle {
-     margin-top: 2pt;
-    font-size: 5pt;
-}
-
-.time {
-    margin-top: 2pt;
-    font-size: 1pt;
-}
-
 .item {
     background: #1e1e1e;
     padding: 12px;
@@ -110,6 +96,20 @@ body > *:not(#printBox) {
     margin-bottom: 1mm;
 }
 
+.strtimetitle {
+    font-size: 5pt;
+}
+
+.endtimetitle {
+     margin-top: 2pt;
+    font-size: 5pt;
+}
+
+.time {
+    margin-top: 2pt;
+    font-size: 5pt;
+}
+
 }
 </style>
 </head>
@@ -176,18 +176,49 @@ function renderList(){
 }
 
 /* 時間 */
-function formatDate(date){
+/*function formatDate(date){
     const y = date.getFullYear();
     const m = String(date.getMonth()+1).padStart(2,'0');
     const d = String(date.getDate()).padStart(2,'0');
     const h = String(date.getHours()).padStart(2,'0');
     const min = String(date.getMinutes()).padStart(2,'0');
     return `${y}/${m}/${d} ${h}:${min}`;
+}*/
+
+function formatDate(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    const h = String(date.getHours()).padStart(2,'0');
+    const min = String(date.getMinutes()).padStart(2,'0');
+    return `${y}/${m}/${d}`;
 }
 
-function calcExpiry(start, days, hours){
+function formatTime(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth()+1).padStart(2,'0');
+    const d = String(date.getDate()).padStart(2,'0');
+    const h = String(date.getHours()).padStart(2,'0');
+    const min = String(date.getMinutes()).padStart(2,'0');
+    return `${h}:${min}`;
+}
+
+
+/*function calcExpiry(start, days, hours){
     const end = new Date(start);
     end.setDate(end.getDate() + Number(days || 0));
+    end.setHours(end.getHours() + Number(hours || 0));
+    return end;
+}*/
+
+function calcExpiry(start, days){
+    const end = new Date(start);
+    end.setDate(end.getDate() + Number(days || 0));
+    return end;
+}
+
+function calcExpiry2(start, hours){
+    const end = new Date(start);
     end.setHours(end.getHours() + Number(hours || 0));
     return end;
 }
@@ -215,7 +246,8 @@ function printItem(i){
     const item = dataList[i];
 
     const start = new Date();
-    const end = calcExpiry(start, item.days, item.hours);
+    const end = calcExpiry(start, item.days);
+    const end2 = calcExpiry2(start, item.hours);
 
     const box = document.getElementById("printBox");
 
@@ -223,8 +255,10 @@ function printItem(i){
         <div class="title">${item.item}</div>
         <div class="strtimetitle">開封時間</div>
         <div class="time">${formatDate(start)}</div>
+    <div class="time">${formatTime(start)}</div>
         <div class="endtimetitle">有效期限</div>
         <div class="time">${formatDate(end)}</div>
+    <div class="time">${formatTime(end2)}</div>
     `;
 
     const title = box.querySelector(".title");
