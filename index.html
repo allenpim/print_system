@@ -2,57 +2,288 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>效期標籤貼紙列印</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 
 <style>
+:root {
+    --paper: #FFF9F1;
+    --paper-soft: #FFF2E2;
+    --ink: #2A2630;
+    --ink-dim: #948C99;
+    --line: #EDE2D3;
+
+    --coral: #FF6B5B;
+    --teal: #1FAFA0;
+    --amber: #FFB627;
+    --violet: #8C6FE6;
+    --mint: #4FB871;
+    --sky: #3E9EDB;
+
+    --primary: #FF6B5B;
+    --primary-ink: #FFFFFF;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background: #111;
-    color: #fff;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background-color: var(--paper);
+    background-image:
+        radial-gradient(circle, var(--line) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+    color: var(--ink);
     margin: 0;
-    padding: 20px;
+    padding: 28px 16px 70px;
+    min-height: 100vh;
 }
 
-h2 {
+h2.page-title {
+    font-family: "Fredoka", sans-serif;
     text-align: center;
+    margin: 0 0 4px;
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.3px;
 }
 
-.list {
-    max-width: 600px;
+.subtitle {
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 0.88rem;
+    margin: 0 0 28px;
+    font-weight: 500;
+}
+
+.container {
+    max-width: 920px;
     margin: auto;
 }
 
-.item {
-    background: #1e1e1e;
-    padding: 12px;
-    margin: 10px 0;
+/* ---------- 麵包屑 / 返回列 ---------- */
+.topbar {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    border-radius: 8px;
+    justify-content: space-between;
+    max-width: 920px;
+    margin: 0 auto 22px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-button {
-    background: #4f46e5;
-    color: #fff;
+.back-btn {
+    background: var(--ink);
     border: none;
-    padding: 8px 12px;
-    border-radius: 6px;
+    color: var(--paper);
+    padding: 9px 18px;
+    border-radius: 999px;
     cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.15s ease, background 0.15s ease;
 }
 
-button:hover {
-    background: #4338ca;
+.back-btn:hover {
+    background: var(--primary);
+    transform: translateY(-1px);
 }
 
-/* 隱藏列印區 */
+.back-btn:active {
+    transform: scale(0.96);
+}
+
+.crumb {
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.crumb b {
+    color: var(--ink);
+    font-family: "Fredoka", sans-serif;
+    font-weight: 600;
+}
+
+/* ---------- 卡片網格（分類 / 品項共用） ---------- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    --tag: var(--coral);
+    background: #FFFFFF;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 16px 18px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 112px;
+    position: relative;
+    overflow: visible;
+    box-shadow: 0 2px 0 rgba(42,38,48,0.04);
+    transition: transform 0.18s cubic-bezier(.34,1.56,.64,1), box-shadow 0.18s ease, border-color 0.18s ease;
+    user-select: none;
+}
+
+/* 頂部色條：像貼紙上的色帶 */
+.card::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 14px;
+    right: 14px;
+    height: 5px;
+    border-radius: 0 0 4px 4px;
+    background: var(--tag);
+}
+
+/* 右上角貼紙翹角 */
+.card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, transparent 50%, rgba(42,38,48,0.07) 50%);
+    border-radius: 0 18px 0 0;
+    transition: width 0.18s ease, height 0.18s ease;
+}
+
+.card:nth-child(4n+1) { transform: rotate(-0.6deg); }
+.card:nth-child(4n+2) { transform: rotate(0.5deg); }
+.card:nth-child(4n+3) { transform: rotate(-0.4deg); }
+.card:nth-child(4n+4) { transform: rotate(0.7deg); }
+
+.card:hover {
+    transform: translateY(-5px) rotate(0deg) !important;
+    box-shadow: 0 10px 20px rgba(42,38,48,0.12);
+    border-color: var(--tag);
+}
+
+.card:hover::after {
+    width: 24px;
+    height: 24px;
+}
+
+.card:active {
+    transform: translateY(-2px) rotate(0deg) scale(0.98) !important;
+}
+
+.card .label {
+    font-family: "Fredoka", sans-serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    word-break: break-word;
+    color: var(--ink);
+}
+
+.card .expire {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink-dim);
+    margin-top: 6px;
+}
+
+.card .count {
+    font-size: 0.74rem;
+    color: var(--ink-dim);
+    font-weight: 600;
+}
+
+/* 品項卡片獨有：列印提示 */
+.item-card .hint {
+    position: absolute;
+    top: 9px;
+    left: 14px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: var(--tag);
+    background: color-mix(in srgb, var(--tag) 12%, white);
+    padding: 3px 8px;
+    border-radius: 999px;
+}
+
+.item-card.printing {
+    border-color: var(--tag);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tag) 25%, transparent);
+}
+
+.empty {
+    text-align: center;
+    color: var(--ink-dim);
+    padding: 70px 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+/* ---------- 分類說明框 ---------- */
+.legend {
+    max-width: 480px;
+    margin: 28px auto 0;
+    background: #FFFFFF;
+    border: 1px dashed var(--line);
+    border-radius: 16px;
+    padding: 16px 20px;
+}
+
+.legend-title {
+    font-family: "Fredoka", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-dim);
+    margin-bottom: 10px;
+}
+
+.legend-row {
+    font-size: 0.82rem;
+    color: var(--ink);
+    line-height: 1.7;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transform: translateY(1px);
+}
+
+.legend-row b {
+    font-family: "Fredoka", sans-serif;
+    font-weight: 600;
+}
+
+/* ---------- 隱藏列印區 ---------- */
 #printBox {
     display: none;
 }
 
-/* 列印設定 */
+/* ---------- 列印設定（維持原樣，確保印表機正確輸出） ---------- */
 @media print {
 
 @page {
@@ -65,8 +296,8 @@ body * {
 }
 
 body > *:not(#printBox) {
-     display: none !important;
-   }
+    display: none !important;
+}
 
 #printBox, #printBox * {
     visibility: visible;
@@ -101,7 +332,7 @@ body > *:not(#printBox) {
 }
 
 .endtimetitle {
-     margin-top: 2pt;
+    margin-top: 2pt;
     font-size: 5pt;
 }
 
@@ -116,100 +347,230 @@ body > *:not(#printBox) {
 
 <body>
 
-<h2>效期標籤貼紙列印</h2>
+<div class="container">
+    <h2 class="page-title">效期標籤貼紙列印</h2>
+    <p class="subtitle" id="subtitle">讀取資料中…</p>
+</div>
 
-<div id="list"></div>
+<div class="topbar" id="topbar" style="display:none;">
+    <button class="back-btn" id="backBtn" onclick="goBack()">← 返回分類</button>
+    <span class="crumb">目前分類：<b id="currentCategory"></b></span>
+</div>
+
+<div class="container">
+    <div id="view"></div>
+</div>
+
 <div id="printBox"></div>
 
 <script>
 let dataList = [];
+let categories = [];
+let currentView = "category"; // "category" | "items"
+let activeCategory = null;
 
-/* 本機測試讀 Excel */
-// async function loadExcel(){
+/* 欄位名稱設定：之後依實際 Excel 欄位調整這裡即可 */
+const FIELD = {
+    type: "type",   // 分類欄位
+    item: "item",   // 品項名稱
+    days: "days",
+    hours: "hours"
+};
 
-//     try {
-//         const res = await fetch("./data.xlsx");
-//         const buffer = await res.arrayBuffer();
+/* 分類代號對照表：依你的代號規則設定名稱與說明 */
+const CATEGORY_LABELS = {
+    "1": { name: "原料", desc: "檸檬汁、養樂多等基底原料" },
+    "2": { name: "茶葉", desc: "" },
+    "3": { name: "配料", desc: "珍珠、椰果等配料" }
+};
 
-//         const workbook = XLSX.read(buffer, {type:"array"});
-//         const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-//         dataList = XLSX.utils.sheet_to_json(sheet);
-
-//         renderList();
-
-//     } catch (err) {
-//         console.error("Excel 載入失敗：", err);
-//         alert("讀取 data.xlsx 失敗，請確認有開 Live Server");
-//     }
-// }
-
-/* github讀 Excel */
-async function loadExcel(){
-
-    const res = await fetch("./data.xlsx");
-    const buffer = await res.arrayBuffer();
-
-    const workbook = XLSX.read(buffer, {type:"array"});
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    dataList = XLSX.utils.sheet_to_json(sheet);
-
-    renderList();
+function getCategoryInfo(rawType){
+    const key = String(rawType ?? "").trim() || "未分類";
+    return CATEGORY_LABELS[key] || { name: key, desc: "" };
 }
 
-/* 顯示清單 */
-function renderList(){
+/* 分類配色盤：依分類代號雜湊取色，確保同分類每次顏色一致 */
+const PALETTE = ["coral", "teal", "amber", "violet", "mint", "sky"];
 
-    const list = document.getElementById("list");
-    list.innerHTML = "";
+function colorForCategory(key){
+    const name = String(key ?? "");
+    let hash = 0;
+    for(let i = 0; i < name.length; i++){
+        hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    }
+    return PALETTE[hash % PALETTE.length];
+}
 
-    dataList.forEach((item, i) => {
+/* github 讀 Excel */
+async function loadExcel(){
+    try {
+        const res = await fetch("./data.xlsx");
+        const buffer = await res.arrayBuffer();
 
-        list.innerHTML += `
-            <div class="item">
-                <div>${item.item}</div>
-                <button onclick="printItem(${i})">列印</button>
-            </div>
-        `;
+        const workbook = XLSX.read(buffer, {type:"array"});
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        dataList = XLSX.utils.sheet_to_json(sheet);
+
+        buildCategories();
+        document.getElementById("subtitle").textContent = "請選擇分類";
+        history.replaceState({view: "category"}, "", location.pathname);
+        renderCategoryView(false);
+
+    } catch (err) {
+        console.error("Excel 載入失敗：", err);
+        document.getElementById("subtitle").textContent = "資料載入失敗，請確認 data.xlsx 是否存在";
+    }
+}
+
+/* 整理分類列表（修正：統一用字串比對，避免數字/文字型態不一致導致篩選失敗） */
+function buildCategories(){
+    const map = new Map();
+
+    dataList.forEach(item => {
+        const key = String(item[FIELD.type] ?? "").trim() || "未分類";
+        if(!map.has(key)) map.set(key, 0);
+        map.set(key, map.get(key) + 1);
+    });
+
+    categories = Array.from(map.entries()).map(([key, count]) => {
+        const info = getCategoryInfo(key);
+        return { key, name: info.name, desc: info.desc, count };
     });
 }
 
-/* 時間 */
-/*function formatDate(date){
-    const y = date.getFullYear();
-    const m = String(date.getMonth()+1).padStart(2,'0');
-    const d = String(date.getDate()).padStart(2,'0');
-    const h = String(date.getHours()).padStart(2,'0');
-    const min = String(date.getMinutes()).padStart(2,'0');
-    return `${y}/${m}/${d} ${h}:${min}`;
-}*/
+/* ---------- 分類頁 ---------- */
+function renderCategoryView(pushState = true){
+    currentView = "category";
+    activeCategory = null;
 
+    document.getElementById("topbar").style.display = "none";
+    document.getElementById("subtitle").textContent = "請選擇分類";
+
+    if(pushState){
+        history.pushState({view: "category"}, "", location.pathname);
+    }
+
+    const view = document.getElementById("view");
+
+    if(categories.length === 0){
+        view.innerHTML = `<div class="empty">沒有可用的分類資料</div>`;
+        return;
+    }
+
+    view.innerHTML = `<div class="grid">
+        ${categories.map(cat => `
+            <div class="card" style="--tag: var(--${colorForCategory(cat.key)})" onclick="openCategory('${escapeAttr(cat.key)}')">
+                <div class="label">${escapeHtml(cat.name)}</div>
+                <div class="count">${cat.count} 項</div>
+            </div>
+        `).join("")}
+    </div>
+    <div class="legend">
+        <div class="legend-title">分類說明</div>
+        ${categories
+            .filter(cat => cat.desc)
+            .map(cat => `<div class="legend-row"><span class="legend-dot" style="background: var(--${colorForCategory(cat.key)})"></span><b>${escapeHtml(cat.name)}</b>：${escapeHtml(cat.desc)}</div>`)
+            .join("")}
+    </div>`;
+}
+
+function openCategory(catKey, pushState = true){
+    activeCategory = catKey;
+    currentView = "items";
+
+    const info = getCategoryInfo(catKey);
+
+    document.getElementById("topbar").style.display = "flex";
+    document.getElementById("currentCategory").textContent = info.name;
+    document.getElementById("subtitle").textContent = "點擊品項即可列印標籤";
+
+    if(pushState){
+        history.pushState({view: "items", category: catKey}, "", `#${encodeURIComponent(catKey)}`);
+    }
+
+    renderItemView();
+}
+
+function goBack(){
+    history.back();
+}
+
+/* 監聽瀏覽器返回鍵 / 手機返回手勢 */
+window.addEventListener("popstate", (e) => {
+    if(e.state && e.state.view === "items"){
+        openCategory(e.state.category, false);
+    } else {
+        renderCategoryView(false);
+    }
+});
+
+/* ---------- 品項頁（原列印頁，整合為卡片式按鈕） ---------- */
+function renderItemView(){
+    const view = document.getElementById("view");
+    const tagColor = colorForCategory(activeCategory);
+
+    const items = dataList
+        .map((item, originalIndex) => ({...item, originalIndex}))
+        .filter(item => {
+            const key = String(item[FIELD.type] ?? "").trim() || "未分類";
+            return key === activeCategory;
+        });
+
+    if(items.length === 0){
+        view.innerHTML = `<div class="empty">此分類目前沒有品項</div>`;
+        return;
+    }
+
+    view.innerHTML = `<div class="grid">
+        ${items.map(item => `
+            <!--<div class="card item-card" id="card-${item.originalIndex}" style="--tag: var(--${tagColor})" onclick="printItem(${item.originalIndex})">
+                <span class="hint">點擊列印</span>
+                <div class="label">${escapeHtml(item[FIELD.item] ?? "")}</div>
+            </div>-->
+            <div class="card item-card"
+                id="card-${item.originalIndex}"
+                style="--tag: var(--${tagColor})"
+                onclick="printItem(${item.originalIndex})">
+
+                <span class="hint">點擊列印</span>
+
+                <div class="label">
+                    ${escapeHtml(item[FIELD.item] ?? "")}
+                </div>
+
+                ${(() => {
+                    const day = Number(item[FIELD.days] ?? 0);
+                    const hour = Number(item[FIELD.hours] ?? 0);
+
+                    const expire = [
+                        day > 0 ? `D+${day}天` : "",
+                        hour > 0 ? `H+${hour}小時` : ""
+                    ].filter(Boolean).join(" ");
+
+                    return expire
+                        ? `<div class="expire">${escapeHtml(expire)}</div>`
+                        : "";
+                })()}
+
+            </div>
+        `).join("")}
+    </div>`;
+}
+
+/* ---------- 時間相關 ---------- */
 function formatDate(date){
     const y = date.getFullYear();
     const m = String(date.getMonth()+1).padStart(2,'0');
     const d = String(date.getDate()).padStart(2,'0');
-    const h = String(date.getHours()).padStart(2,'0');
-    const min = String(date.getMinutes()).padStart(2,'0');
     return `${y}/${m}/${d}`;
 }
 
 function formatTime(date){
-    const y = date.getFullYear();
-    const m = String(date.getMonth()+1).padStart(2,'0');
-    const d = String(date.getDate()).padStart(2,'0');
     const h = String(date.getHours()).padStart(2,'0');
     const min = String(date.getMinutes()).padStart(2,'0');
     return `${h}:${min}`;
 }
-
-
-/*function calcExpiry(start, days, hours){
-    const end = new Date(start);
-    end.setDate(end.getDate() + Number(days || 0));
-    end.setHours(end.getHours() + Number(hours || 0));
-    return end;
-}*/
 
 function calcExpiry(start, days){
     const end = new Date(start);
@@ -225,10 +586,7 @@ function calcExpiry2(start, hours){
 
 /* 自動縮字 */
 function autoFitText(el, max = 5, min = 2){
-
     const text = el.textContent || "";
-    
-    // 不超過 6 個字 → 不處理
     if (text.length <= 6) return;
 
     let size = max;
@@ -240,33 +598,50 @@ function autoFitText(el, max = 5, min = 2){
     }
 }
 
-/* 列印 */
-function printItem(i){
-
-    const item = dataList[i];
+/* 列印（點卡片本身即觸發） */
+function printItem(originalIndex){
+    const item = dataList[originalIndex];
 
     const start = new Date();
-    const end = calcExpiry(start, item.days);
-    const end2 = calcExpiry2(start, item.hours);
+    const end = calcExpiry(start, item[FIELD.days]);
+    const end2 = calcExpiry2(start, item[FIELD.hours]);
 
     const box = document.getElementById("printBox");
 
     box.innerHTML = `
-        <div class="title">${item.item}</div>
+        <div class="title">${escapeHtml(item[FIELD.item] ?? "")}</div>
         <div class="strtimetitle">開封時間</div>
         <div class="time">${formatDate(start)}</div>
-    <div class="time">${formatTime(start)}</div>
+        <div class="time">${formatTime(start)}</div>
         <div class="endtimetitle">有效期限</div>
         <div class="time">${formatDate(end)}</div>
-    <div class="time">${formatTime(end2)}</div>
+        <div class="time">${formatTime(end2)}</div>
     `;
 
     const title = box.querySelector(".title");
     autoFitText(title);
 
+    const card = document.getElementById(`card-${originalIndex}`);
+    if(card){
+        card.classList.add("printing");
+        setTimeout(() => card.classList.remove("printing"), 600);
+    }
+
     setTimeout(() => {
         window.print();
     }, 200);
+}
+
+/* ---------- 安全輸出（避免品項名稱含特殊字元造成 HTML 錯亂） ---------- */
+function escapeHtml(str){
+    return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+function escapeAttr(str){
+    return String(str).replace(/'/g, "\\'");
 }
 
 /* 啟動 */
